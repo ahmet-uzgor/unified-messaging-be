@@ -66,3 +66,11 @@ npx prisma migrate dev
 
 # Start the development server
 npm run start:dev
+
+unified-messaging-backend/
+├── src/
+│   ├── ai/                 # AI service integration
+│   ├── platforms/         # Social media platform integrations
+│   ├── messages/         # Message handling
+│   ├── faq/             # FAQ management
+│   └── prisma/          # Database schema and client
