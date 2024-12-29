@@ -1,57 +1,59 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { AIBotService } from '../ai-bot/ai-bot.service';
-import { InstagramService } from '../platforms/instagram/instagram.service';
-import { WhatsAppService } from '../platforms/whatsapp/whatsapp.service';
-import { PrismaService } from '../prisma/prisma.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { MessagesService } from './message.service';
 
 @Controller('messages')
 @ApiTags('messages')
 export class MessagesController {
-  constructor(
-    private readonly instagramService: InstagramService,
-    private readonly whatsappService: WhatsAppService,
-    private readonly aiService: AIBotService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly messagesService: MessagesService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all messages from all platforms' })
+  @ApiResponse({ status: 200, description: 'Return all messages.' })
   async getAllMessages() {
-    return this.instagramService.getMessages();
-    // Process and normalize messages
-    // Store in database
-    // Return unified format
+    try {
+      return await this.messagesService.getAllMessages();
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post('send')
+  @ApiOperation({ summary: 'Send a message to a specific platform' })
+  @ApiResponse({ status: 200, description: 'Message sent successfully.' })
   async sendMessage(
     @Body() data: { platform: string; recipientId: string; message: string },
   ) {
-    const { platform, recipientId, message } = data;
-
-    let response;
-    if (platform === 'instagram') {
-      response = await this.instagramService.sendMessage(recipientId, message);
-    } else if (platform === 'whatsapp') {
-      response = await this.whatsappService.sendMessage(recipientId, message);
-    }
-
-    // Store in database
-    await this.prisma.message.create({
-      data: {
+    try {
+      const { platform, recipientId, message } = data;
+      return await this.messagesService.sendMessage(
         platform,
-        externalId: response.id,
-        senderId: recipientId,
-        content: message,
-        status: 'sent',
-      },
-    });
-
-    return response;
+        recipientId,
+        message,
+      );
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Post('ai-response')
+  @ApiOperation({ summary: 'Get AI-generated response for a message' })
+  @ApiResponse({
+    status: 200,
+    description: 'AI response generated successfully.',
+  })
   async getAIResponse(@Body() data: { message: string }) {
-    return this.aiService.getResponse(data.message);
+    try {
+      return await this.messagesService.getAIResponse(data.message);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
