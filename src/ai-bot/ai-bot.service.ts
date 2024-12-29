@@ -1,7 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
 import { FAQService } from 'src/faqs/faqs.service';
 
 @Injectable()
