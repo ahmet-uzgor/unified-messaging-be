@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { FAQService } from 'src/faqs/faqs.service';
 
 @Injectable()
 export class AIBotService {
@@ -9,7 +10,7 @@ export class AIBotService {
 
   constructor(
     private configService: ConfigService,
-    private prisma: PrismaService,
+    private faqService: FAQService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.configService.get<string>('anthropic.apiKey'),
@@ -19,7 +20,7 @@ export class AIBotService {
   async getResponse(message: string) {
     try {
       // Get FAQs from database
-      const faqs = await this.prisma.fAQ.findMany();
+      const faqs = await this.faqService.getAllFAQs();
       const faqContext = faqs
         .map((faq) => `Q: ${faq.question}\nA: ${faq.answer}`)
         .join('\n\n');
