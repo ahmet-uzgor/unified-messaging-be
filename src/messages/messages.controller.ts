@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AIBotService } from 'src/ai-bot/ai-bot.service';
-import { InstagramService } from 'src/platforms/instagram/instagram.service';
-import { WhatsAppService } from 'src/platforms/whatsapp/whatsapp.service';
-import { PrismaService } from 'src/prisma.service';
+import { AIBotService } from '../ai-bot/ai-bot.service';
+import { InstagramService } from '../platforms/instagram/instagram.service';
+import { WhatsAppService } from '../platforms/whatsapp/whatsapp.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Controller('messages')
 @ApiTags('messages')
@@ -17,12 +17,7 @@ export class MessagesController {
 
   @Get()
   async getAllMessages() {
-    const [instagramMessages, whatsappMessages] = await Promise.all([
-      this.instagramService.getMessages(),
-      this.whatsappService.getMessages(),
-    ]);
-
-    return [instagramMessages, whatsappMessages];
+    return this.instagramService.getMessages();
     // Process and normalize messages
     // Store in database
     // Return unified format
